@@ -96,7 +96,7 @@ def register_key(uid, key):
     DB["user_keys"][str(uid)] = key
     save_db()
 def is_allowed_guild(gid): return gid is not None and gid in DB["guilds"]
-def is_admin(uid): return uid == ADMIN_ID
+def is_admin(uid): return uid in ADMIN_ID
 
 # ==================== FİLTRE ====================
 HARD_BLOCK = [
