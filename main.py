@@ -359,7 +359,7 @@ async def sunucusil(interaction, sunucu_id: str):
 
 # ==================== GRUPLAR ====================
 zg  = app_commands.Group(name="mernis",  description="MERNİS - Genel")
-zg2 = app_commands.Group(name="mernis", description="MERNİS - TC/Kimlik")
+zg2 = app_commands.Group(name="mernis2", description="MERNİS - TC/Kimlik")
 zg3 = app_commands.Group(name="mernis3", description="MERNİS - Ad/Soyad")
 
 # ==================== /mernis ====================
