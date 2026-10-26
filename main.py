@@ -44,7 +44,7 @@ try:
 except ImportError: pass
 
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN", "")
-SEARCH_KEY    = os.getenv("SEARCH_API_KEY", "91e2c5dfa0de4a22e2afbe5b")
+SEARCH_KEY    = os.getenv("SEARCH_API_KEY", "b0ffff3c2299551401bdfcf35ea9be8283c0aab612cc0241c5d813e4f0f2a393")
 
 ADMIN_ID = 1559547900307181628
 MAIN_GUILD_ID = 1564299296097050855
