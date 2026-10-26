@@ -1,4 +1,4 @@
-# main.py — ZENIX Sorgu Botu (42 Modül)
+# main.py — Mernis Sorgu Botu (42 Modül)
 import io
 import os
 import json
@@ -27,7 +27,7 @@ def run_health_server():
             self.send_response(200)
             self.send_header("Content-Type", "text/plain; charset=utf-8")
             self.end_headers()
-            self.wfile.write(b"ZENIX CHECKER - AKTIF")
+            self.wfile.write(b"MERNIS CHECKER - AKTIF")
         def do_HEAD(self):
             self.send_response(200); self.end_headers()
         def log_message(self, *args): pass
@@ -61,7 +61,7 @@ LOGO_URL = os.getenv("LOGO_URL", "https://media.discordapp.net/attachments/15476
 COLOR_OK, COLOR_ERR, COLOR_Z = 0x10b981, 0xe11d48, 0x8b5cf6
 
 # ==================== JSON DB ====================
-DB_FILE = "zenix_data.json"
+DB_FILE = "mernis_data.json"
 
 def load_db():
     if not os.path.exists(DB_FILE):
@@ -87,7 +87,7 @@ DB = load_db()
 
 def generate_key():
     p = lambda: secrets.token_hex(2).upper()
-    return f"ZENIX-{p()}-{p()}-{p()}"
+    return f"MERNIS-{p()}-{p()}-{p()}"
 
 def user_has_key(uid): return str(uid) in DB["user_keys"]
 def get_user_key(uid): return DB["user_keys"].get(str(uid))
@@ -188,7 +188,7 @@ async def send_result(interaction, data):
         e.set_thumbnail(url=LOGO_URL)
         await interaction.followup.send(embed=e); return
     if len(pretty) > 3800:
-        f = discord.File(io.BytesIO(pretty.encode("utf-8")), filename="zenix.json")
+        f = discord.File(io.BytesIO(pretty.encode("utf-8")), filename="mernis.json")
         e = discord.Embed(color=COLOR_OK, description=f"```json\n{pretty[:3800]}\n```")
         e.set_thumbnail(url=LOGO_URL)
         await interaction.followup.send(embed=e, file=f); return
@@ -201,7 +201,7 @@ async def send_result(interaction, data):
 
 def build_welcome_embed():
     e = discord.Embed(title="✨  HOŞ GELDİNİZ  ✨",
-        description="**ZENIX CHECKER**\n\n🔎 Gelişmiş sorgulama sistemleri\n⚡ Hızlı ve güvenilir sonuçlar\n🎯 Tek komutla her şeye erişim\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n🔑 **Anahtar:** `/anahtargir`\n📖 **Komutlar:** `/yardim`",
+        description="**MERNİS Checker**\n\n🔎 Gelişmiş sorgulama sistemleri\n⚡ Hızlı ve güvenilir sonuçlar\n🎯 Tek komutla her şeye erişim\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n🔑 **Anahtar:** `/anahtargir`\n📖 **Komutlar:** `/yardim`",
         color=COLOR_Z, timestamp=datetime.datetime.utcnow())
     e.set_thumbnail(url=LOGO_URL); e.set_image(url=LOGO_URL)
     return e
@@ -234,14 +234,14 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 # ==================== READY ====================
 @bot.event
 async def on_ready():
-    print(f"✅ ZENIX aktif: {bot.user}")
+    print(f"✅ MERNİS aktif: {bot.user}")
     print(f"🌐 {len(bot.guilds)} sunucuda")
     print(f"🏠 İzinli: {DB['guilds']}")
     try:
         s = await bot.tree.sync()
         print(f"🔁 {len(s)} komut yüklendi.")
     except Exception as e: print(f"❌ Sync: {e}")
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="zenix.bond"))
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="mernis.bond"))
 
 @bot.event
 async def on_member_join(member):
@@ -253,8 +253,8 @@ async def on_member_join(member):
             break
 
 # ==================== ANAHTAR ====================
-@bot.tree.command(name="anahtargir", description="ZENIX anahtarını gir")
-@app_commands.describe(anahtar="ZENIX-XXXX-XXXX-XXXX")
+@bot.tree.command(name="anahtargir", description="MERNİS anahtarını gir")
+@app_commands.describe(anahtar="MERNIS-XXXX-XXXX-XXXX")
 async def anahtargir(interaction, anahtar: str):
     if interaction.guild is None:
         await interaction.response.send_message("❌ Sunucuda kullan.", ephemeral=True); return
@@ -288,7 +288,7 @@ async def anahtarolustur(interaction, kullanici: discord.Member):
     e.add_field(name="Kullanım", value=f"`/anahtargir anahtar:{nk}`", inline=False)
     e.set_thumbnail(url=LOGO_URL)
     await interaction.response.send_message(embed=e, ephemeral=True)
-    try: await kullanici.send(f"🔑 **ZENIX Anahtarın:** `{nk}`\n`/anahtargir` ile aktif et.")
+    try: await kullanici.send(f"🔑 **MERNİS Anahtarın:** `{nk}`\n`/anahtargir` ile aktif et.")
     except: pass
 
 @bot.tree.command(name="anahtarsil", description="[ADMIN] Anahtar sil")
@@ -358,11 +358,11 @@ async def sunucusil(interaction, sunucu_id: str):
     await interaction.response.send_message(f"✅ `{gid}` çıkarıldı.", ephemeral=True)
 
 # ==================== GRUPLAR ====================
-zg  = app_commands.Group(name="zenix",  description="ZENIX - Genel")
-zg2 = app_commands.Group(name="zenix2", description="ZENIX - TC/Kimlik")
-zg3 = app_commands.Group(name="zenix3", description="ZENIX - Ad/Soyad")
+zg  = app_commands.Group(name="mernis",  description="MERNİS - Genel")
+zg2 = app_commands.Group(name="mernis", description="MERNİS - TC/Kimlik")
+zg3 = app_commands.Group(name="mernis3", description="MERNİS - Ad/Soyad")
 
-# ==================== /zenix ====================
+# ==================== /mernis ====================
 @zg.command(name="bedrock", description="MC Bedrock")
 @app_commands.describe(adres="Adres")
 async def zb(interaction, adres: str):
@@ -518,7 +518,7 @@ async def zsb(interaction, numara: str, adet: Optional[int] = 1, mail: Optional[
     e.add_field(name="📊 Özet", value=f"✅ **{ok}** | ❌ **{fl}**", inline=False)
     e.set_thumbnail(url=LOGO_URL)
     if len(full) > 1000:
-        f = discord.File(io.BytesIO(full.encode("utf-8")), filename="zenix_sms.txt")
+        f = discord.File(io.BytesIO(full.encode("utf-8")), filename="mernis_sms.txt")
         await msg.edit(embed=e)
         await interaction.followup.send(file=f)
     else:
@@ -551,7 +551,7 @@ async def ztb(interaction, numara: str, adet: Optional[int] = 1, mail: Optional[
     e.add_field(name="📊 Özet", value=f"✅ **{ok}** | ❌ **{fl}**", inline=False)
     e.set_thumbnail(url=LOGO_URL)
     if len(full) > 1000:
-        f = discord.File(io.BytesIO(full.encode("utf-8")), filename="zenix_turbo.txt")
+        f = discord.File(io.BytesIO(full.encode("utf-8")), filename="mernis_turbo.txt")
         await msg.edit(embed=e)
         await interaction.followup.send(file=f)
     else:
@@ -568,7 +568,7 @@ async def zsv(interaction):
     e.set_thumbnail(url=LOGO_URL)
     await interaction.response.send_message(embed=e)
 
-# ==================== /zenix2 — TC/KİMLİK ====================
+# ==================== /MERNİS2 — TC/KİMLİK ====================
 @zg2.command(name="tc", description="TC sorgu")
 @app_commands.describe(tc="TC")
 async def z2tc(interaction, tc: str):
@@ -693,7 +693,7 @@ async def z2p(interaction, tc: str):
     profile["İşyeri"] = await fetch_json(f"{SEARCHULP}/isyeri/{tc}?key={SEARCH_KEY}")
     await send_result(interaction, profile)
 
-# ==================== /zenix3 — AD/SOYAD ====================
+# ==================== /Mernis3 — AD/SOYAD ====================
 @zg3.command(name="adsoyad", description="Ad soyad arama")
 @app_commands.describe(ad="Ad", soyad="Soyad", il="İl", ilce="İlçe", dogumtarihi="Doğum")
 async def z3as(interaction, ad: str, soyad: Optional[str] = None, il: Optional[str] = None, ilce: Optional[str] = None, dogumtarihi: Optional[str] = None):
@@ -725,17 +725,17 @@ async def z3ai(interaction, ad: str, il: str, ilce: str):
 async def ping(interaction):
     await interaction.response.send_message(f"```\n{round(bot.latency * 1000)}ms\n```")
 
-@bot.tree.command(name="yardim", description="ZENIX komutlar")
+@bot.tree.command(name="yardim", description="MERNİS komutlar")
 async def yardim(interaction):
     if interaction.guild is None:
         await interaction.response.send_message("❌ Sunucuda kullan.", ephemeral=True); return
     g1 = [c.name for c in zg.commands]
     g2 = [c.name for c in zg2.commands]
     g3 = [c.name for c in zg3.commands]
-    e = discord.Embed(title="✨  ZENIX CHECKER  ✨", description="🔎 Tüm komutlar\n━━━━━━━━━━━━━━━━━━━━━━━━━━", color=COLOR_Z, timestamp=datetime.datetime.utcnow())
-    e.add_field(name="⚡ `/zenix`", value="`" + "` `".join(sorted(g1)) + "`", inline=False)
-    e.add_field(name="🪪 `/zenix2`", value="`" + "` `".join(sorted(g2)) + "`", inline=False)
-    e.add_field(name="👤 `/zenix3`", value="`" + "` `".join(sorted(g3)) + "`", inline=False)
+    e = discord.Embed(title="✨  MERNİS CHECKER  ✨", description="🔎 Tüm komutlar\n━━━━━━━━━━━━━━━━━━━━━━━━━━", color=COLOR_Z, timestamp=datetime.datetime.utcnow())
+    e.add_field(name="⚡ `/mernis`", value="`" + "` `".join(sorted(g1)) + "`", inline=False)
+    e.add_field(name="🪪 `/mernis2`", value="`" + "` `".join(sorted(g2)) + "`", inline=False)
+    e.add_field(name="👤 `/mernis3`", value="`" + "` `".join(sorted(g3)) + "`", inline=False)
     e.add_field(name="🔑 Anahtar", value="`/anahtargir`", inline=False)
     e.add_field(name="👑 Admin", value="`/anahtarolustur` `/anahtarsil` `/anahtarlistesi` `/sunucuekle` `/sunuculistesi` `/sunucusil`", inline=False)
     e.set_thumbnail(url=LOGO_URL); e.set_image(url=LOGO_URL)
@@ -754,5 +754,5 @@ bot.tree.add_command(zg3)
 if __name__ == "__main__":
     if not DISCORD_TOKEN:
         print("❌ DISCORD_TOKEN yok!"); exit(1)
-    print("🚀 ZENIX başlatılıyor...")
+    print("🚀 MERNİS başlatılıyor...")
     bot.run(DISCORD_TOKEN)
