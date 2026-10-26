@@ -46,8 +46,8 @@ except ImportError: pass
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN", "")
 SEARCH_KEY    = os.getenv("SEARCH_API_KEY", "91e2c5dfa0de4a22e2afbe5b")
 
-ADMIN_ID = 1538810452308533308
-MAIN_GUILD_ID = 1546912458793287725
+ADMIN_ID = 1559547900307181628
+MAIN_GUILD_ID = 1564299296097050855
 
 WAZELY       = "https://wazely.vercel.app/api"
 WAZELY_API   = "https://wazelyapi.vercel.app/api"
